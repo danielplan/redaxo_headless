@@ -1,0 +1,12 @@
+package: headless
+version: '0.0.1-dev'
+author: Daniel Planötscher
+
+load: early
+
+page:
+    title: headless
+    perm: admin
+    icon: rex-icon rex-icon-duplicate
+
+
