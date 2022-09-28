@@ -5,7 +5,7 @@ namespace FriendsOfREDAXO\Headless;
 abstract class Serializer
 {
 
-    private static $serializers = [];
+    private static array $serializers = [];
 
     public abstract function toArray($object): array;
 
@@ -25,6 +25,6 @@ abstract class Serializer
         if($serializer) {
             return $serializer->toArray($object);
         }
-        return [];
+        throw new \Exception('No serializers found for class ' . get_class($object));
     }
 }

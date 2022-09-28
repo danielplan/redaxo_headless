@@ -13,8 +13,8 @@ abstract class HeadlessController
         $endpoint = rex_get('endpoint', 'string');
         if (method_exists($this, $endpoint)) {
             $reflection = new ReflectionMethod($this, $endpoint);
-            $params     = $reflection->getParameters();
-            $args       = [];
+            $params = $reflection->getParameters();
+            $args = [];
 
             foreach ($params as $param) {
                 $paramName = $param->getName();
@@ -25,16 +25,28 @@ abstract class HeadlessController
 
 
             $data = call_user_func_array([$this, $endpoint], $args);
-
-            if(is_object($data)) {
-                $data = Serializer::serializeToArray($data);
-            }
+            $data = static::serializeObject($data);
 
             rex_response::cleanOutputBuffers();
             rex_response::sendJson(['data' => $data]);
             exit;
         }
         throw new \Exception('Method not found');
+    }
+
+    public static function serializeObject($object): array
+    {
+        if (is_object($object)) {
+            return Serializer::serializeToArray($object);
+        }
+        if (is_array($object) && count($object) > 0 && is_object($object[0])) {
+            $result = [];
+            foreach ($object as $item) {
+                $result[] = self::serializeObject($item);
+            }
+            return $result;
+        }
+        return $object;
     }
 
 
@@ -58,7 +70,7 @@ abstract class HeadlessController
     public static function start(): void
     {
         $controller = self::getController();
-        if($controller) {
+        if ($controller) {
             $controller->execute();
             exit;
         }

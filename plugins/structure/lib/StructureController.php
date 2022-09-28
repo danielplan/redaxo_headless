@@ -2,13 +2,13 @@
 
 
 use FriendsOfREDAXO\Headless\HeadlessController;
-use FriendsOfREDAXO\Headless\Serializer;
+use FriendsOfREDAXO\Headless\Structure\ArticleService;
+use FriendsOfREDAXO\Headless\Structure\NavigationService;
 
 
 class StructureController extends HeadlessController
 {
     /**
-     * ENDPOINT
      * retrieve navigation structure
      *
      * @param int $depth
@@ -17,54 +17,31 @@ class StructureController extends HeadlessController
      */
     public function navigation(int $depth = 1): array
     {
-        $article             = Serializer::serializeToArray(rex_article::getSiteStartArticle());
-        $article['children'] = $this->getCategories(rex_category::getRootCategories(true), $depth);
-        return $article;
+        return NavigationService::buildNavigation($depth);
     }
 
     /**
-     * ENDPOINT
      * retrieve article data
      *
      * @param int $id
      *
+     * @return rex_article
+     */
+    public function article(int $id): rex_article
+    {
+        return ArticleService::getArticle($id);
+    }
+
+    /**
+     * retrieve article slices
+     *
+     * @param int $articleId
+     *
      * @return array
      */
-    public function article(int $id): array
+    public function slices(int $articleId): array
     {
-        return Serializer::serializeToArray(rex_article::get($id));
-    }
-
-    private function getCategories(?array $categories, int $depth): array
-    {
-        $navigation = [];
-        foreach ($categories as $category) {
-            $navItem       = Serializer::serializeToArray($category->getStartArticle());
-            $childArticles = $category->getArticles(true);
-            if ($childArticles && count($childArticles) > 1) {
-                $navItem['articles'] = $this->getChildArticles($childArticles);
-            }
-            if ($depth > 1) {
-                $children = $category->getChildren(true);
-                if ($children) {
-                    $navItem['children'] = $this->getCategories($children, $depth - 1);
-                }
-            }
-            $navigation[] = $navItem;
-        }
-        return $navigation;
-    }
-
-    private function getChildArticles(array $articles): array
-    {
-        $result = [];
-        foreach ($articles as $article) {
-            if ($article->isStartArticle()) {
-                continue;
-            }
-            $result[] = Serializer::serializeToArray($article);
-        }
-        return $result;
+        return ArticleService::getArticleSlices($articleId);
     }
 
 }
