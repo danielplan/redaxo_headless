@@ -24,11 +24,20 @@ abstract class HeadlessController
             }
 
 
-            $data = call_user_func_array([$this, $endpoint], $args);
-            $data = static::serializeObject($data);
+            try {
+                $data = call_user_func_array([$this, $endpoint], $args);
+                $data = [
+                    'data' => static::serializeObject($data)
+                ];
+            } catch (\ApiException $e) {
+                rex_response::setStatus($e->getCode());
+                $data = [
+                    'error' => $e->getMessage(),
+                ];
+            }
 
             rex_response::cleanOutputBuffers();
-            rex_response::sendJson(['data' => $data]);
+            rex_response::sendJson($data);
             exit;
         }
         throw new \Exception('Method not found');
