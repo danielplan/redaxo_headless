@@ -10,17 +10,18 @@ abstract class HeadlessController
 {
     public function execute()
     {
-        $endpoint = rex_get('endpoint', 'string');
+        $endpoint = rex_request('endpoint', 'string');
         if (method_exists($this, $endpoint)) {
             $reflection = new ReflectionMethod($this, $endpoint);
             $params = $reflection->getParameters();
+            $requestBody = \rex_var::toArray(file_get_contents('php://input'));
             $args = [];
 
             foreach ($params as $param) {
                 $paramName = $param->getName();
                 $paramType = $param->getType();
                 $paramTypeName = $paramType ? $paramType->getName() : 'string';
-                $args[] = rex_request($paramName, $paramTypeName);
+                $args[] = rex_post($paramName, $paramTypeName) ?: $requestBody[$paramName];
             }
 
 
@@ -61,7 +62,7 @@ abstract class HeadlessController
 
     public static function getController(): ?self
     {
-        $controller = rex_get('headless-controller', 'string');
+        $controller = rex_request('headless-controller', 'string');
         if ($controller) {
             $controller = ucfirst($controller);
             $class = $controller . 'Controller';

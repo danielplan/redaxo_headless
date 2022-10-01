@@ -18,7 +18,7 @@ class ArticleSliceSerializer extends Serializer
         for ($i = 1; $i <= 20; $i++) {
             $this->addValueToResult($result, 'values', $i, $object->getValue($i));
         }
-        for($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $this->addValueToResult($result, 'media', $i, $object->getMedia($i));
             $this->addValueToResult($result, 'mediaList', $i, $object->getMediaList($i), true);
             $this->addValueToResult($result, 'link', $i, $object->getLink($i));
@@ -27,7 +27,8 @@ class ArticleSliceSerializer extends Serializer
         return $result;
     }
 
-    private function getModule($moduleId) {
+    private function getModule($moduleId)
+    {
         $modules = rex_file::getCache(rex_module_cache::getKeyMappingPath());
         return $modules[$moduleId] ?: $moduleId;
     }
@@ -35,14 +36,10 @@ class ArticleSliceSerializer extends Serializer
     private function addValueToResult(array &$result, string $type, int $idx, $value, bool $isList = false)
     {
         if ($value) {
-            if (array_key_exists($type, $result)) {
-                $result[$type] = [];
-            }
             if ($isList) {
                 $value = array_filter(explode(',', $value));
             }
             $result[$type][$idx] = $value;
         }
     }
-
 }
