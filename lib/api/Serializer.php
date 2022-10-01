@@ -21,10 +21,20 @@ abstract class Serializer
 
     public static function serializeToArray($object): array
     {
-        $serializer = self::getSerializer(get_class($object));
-        if($serializer) {
-            return $serializer->toArray($object);
+        if (is_array($object) && array_keys($object) === range(0, count($object) - 1)) {
+            $result = [];
+            foreach ($object as $item) {
+                $result[] = self::serializeToArray($item);
+            }
+            return $result;
         }
-        throw new \Exception('No serializers found for class ' . get_class($object));
+        if (is_object($object)) {
+            $serializer = self::getSerializer(get_class($object));
+            if ($serializer) {
+                return $serializer->toArray($object);
+            }
+            throw new \Exception('No serializer found for ' . get_class($object));
+        }
+        return $object;
     }
 }

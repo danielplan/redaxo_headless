@@ -29,8 +29,8 @@ class ArticleSliceSerializer extends Serializer
 
     private function getModule($moduleId)
     {
-        $modules = rex_file::getCache(rex_module_cache::getKeyMappingPath());
-        return $modules[$moduleId] ?: $moduleId;
+        $module = new rex_module($moduleId);
+        return $module->getKey() ?? $module->getId();
     }
 
     private function addValueToResult(array &$result, string $type, int $idx, $value, bool $isList = false)

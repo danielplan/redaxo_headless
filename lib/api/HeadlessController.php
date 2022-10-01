@@ -12,23 +12,16 @@ abstract class HeadlessController
     {
         $endpoint = rex_request('endpoint', 'string');
         if (method_exists($this, $endpoint)) {
-            $reflection = new ReflectionMethod($this, $endpoint);
-            $params = $reflection->getParameters();
-            $requestBody = \rex_var::toArray(file_get_contents('php://input'));
-            $args = [];
 
-            foreach ($params as $param) {
-                $paramName = $param->getName();
-                $paramType = $param->getType();
-                $paramTypeName = $paramType ? $paramType->getName() : 'string';
-                $args[] = rex_request($paramName, $paramTypeName) ?: $requestBody[$paramName];
-            }
-
+            $args = $this->parseFunctionArgs($endpoint);
 
             try {
                 $data = call_user_func_array([$this, $endpoint], $args);
+                if (is_object($data) || is_array($data)) {
+                    $data = Serializer::serializeToArray($data);
+                }
                 $data = [
-                    'data' => static::serializeObject($data)
+                    'data' => ($data)
                 ];
             } catch (\ApiException $e) {
                 rex_response::setStatus($e->getCode());
@@ -44,19 +37,28 @@ abstract class HeadlessController
         throw new \Exception('Method not found');
     }
 
-    public static function serializeObject($object): array
+    private function parseFunctionArgs(string $endpoint): array
     {
-        if (is_object($object)) {
-            return Serializer::serializeToArray($object);
-        }
-        if (is_array($object) && count($object) > 0 && is_object($object[0])) {
-            $result = [];
-            foreach ($object as $item) {
-                $result[] = self::serializeObject($item);
+        $reflection = new ReflectionMethod($this, $endpoint);
+        $params = $reflection->getParameters();
+        $requestBody = \rex_var::toArray(file_get_contents('php://input'));
+        $args = [];
+
+        foreach ($params as $param) {
+            $paramName = $param->getName();
+            $paramType = $param->getType();
+            $paramTypeName = $paramType ? $paramType->getName() : 'string';
+            $arg = null;
+            if ($requestBody && array_key_exists($paramName, $requestBody)) {
+                $arg = $requestBody[$paramName];
             }
-            return $result;
+            if (!$arg) {
+                $arg = rex_request($paramName, $paramTypeName);
+            }
+            $args[] = $arg;
+
         }
-        return $object;
+        return $args;
     }
 
 

@@ -3,7 +3,7 @@
 
 use FriendsOfREDAXO\Headless\HeadlessController;
 use FriendsOfREDAXO\Headless\Structure\ArticleService;
-use FriendsOfREDAXO\Headless\Structure\NavigationService;
+use FriendsOfREDAXO\Headless\Structure\PagesService;
 
 
 class StructureController extends HeadlessController
@@ -17,7 +17,7 @@ class StructureController extends HeadlessController
      */
     public function navigation(int $depth = 1): array
     {
-        return NavigationService::buildNavigation($depth);
+        return PagesService::buildNavigation($depth);
     }
 
     /**
@@ -43,6 +43,17 @@ class StructureController extends HeadlessController
     {
         return ArticleService::getArticleSlices($articleId);
     }
+
+    /**
+     * retrieve list of all pages
+     *
+     * @return array
+     */
+    public function pages(): array
+    {
+        return PagesService::getPages();
+    }
+
 
 }
 

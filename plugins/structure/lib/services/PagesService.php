@@ -6,26 +6,23 @@ use FriendsOfREDAXO\Headless\Serializer;
 use rex_article;
 use rex_category;
 
-class NavigationService
+class PagesService
+
 {
 
     public static function buildNavigation(int $depth = 1): array
     {
         $article = Serializer::serializeToArray(rex_article::getSiteStartArticle());
-        $article['children'] = static::getChildCategories(rex_category::getRootCategories(true), $depth);
+        $article['children'] = static::getSubNavigation(rex_category::getRootCategories(true), $depth);
         return $article;
     }
 
     protected static function getRootArticles(): array
     {
-        $articles = [];
-        foreach (rex_category::getRootCategories(true) as $category) {
-            $articles[] = Serializer::serializeToArray($category->getArticle());
-        }
-        return $articles;
+        return rex_article::getRootArticles(true);
     }
 
-    protected static function getChildCategories(?array $categories, int $depth): array
+    protected static function getSubNavigation(?array $categories, int $depth): array
     {
         $navigation = [];
         foreach ($categories as $category) {
@@ -37,7 +34,7 @@ class NavigationService
             if ($depth > 1) {
                 $children = $category->getChildren(true);
                 if ($children) {
-                    $navItem['children'] = static::getChildCategories($children, $depth - 1);
+                    $navItem['children'] = static::getSubNavigation($children, $depth - 1);
                 }
             }
             $navigation[] = $navItem;
@@ -55,5 +52,26 @@ class NavigationService
             $result[] = Serializer::serializeToArray($article);
         }
         return $result;
+    }
+
+    public static function getPages(): array
+    {
+        $pages = static::getRootArticles();
+        foreach (rex_category::getRootCategories(true) as $category) {
+            $pages = array_merge($pages, static::getChildPages($category));
+        }
+        return $pages;
+    }
+
+    protected static function getChildPages(?rex_category $category): array
+    {
+        $pages = [];
+        if ($category) {
+            $pages = array_merge($pages, $category->getArticles(true));
+            foreach ($category->getChildren(true) as $child) {
+                $pages = array_merge($pages, static::getChildPages($child));
+            }
+        }
+        return $pages;
     }
 }
