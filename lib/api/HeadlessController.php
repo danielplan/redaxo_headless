@@ -21,7 +21,7 @@ abstract class HeadlessController
                 $paramName = $param->getName();
                 $paramType = $param->getType();
                 $paramTypeName = $paramType ? $paramType->getName() : 'string';
-                $args[] = rex_post($paramName, $paramTypeName) ?: $requestBody[$paramName];
+                $args[] = rex_request($paramName, $paramTypeName) ?: $requestBody[$paramName];
             }
 
 
