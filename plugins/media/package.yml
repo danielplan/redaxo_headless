@@ -1,0 +1,6 @@
+package: headless/media
+version: '0.0.1-dev'
+author: Daniel Planötscher
+
+load: early
+

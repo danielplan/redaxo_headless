@@ -7,14 +7,15 @@ use rex_article;
 use rex_category;
 
 class PagesService
-
 {
 
-    public static function buildNavigation(int $depth = 1): array
+    public static function buildNavigation(int $currentArticleId, int $depth = 1): array
     {
-        $article = Serializer::serializeToArray(rex_article::getSiteStartArticle());
-        $article['children'] = static::getSubNavigation(rex_category::getRootCategories(true), $depth);
-        return $article;
+        $navigation = [];
+        $navigation[] = Serializer::serializeToArray(rex_article::getSiteStartArticle());
+
+        $navigation = array_merge($navigation, static::getSubNavigation(rex_category::getRootCategories(true), $depth));
+        return $navigation;
     }
 
     protected static function getRootArticles(): array
