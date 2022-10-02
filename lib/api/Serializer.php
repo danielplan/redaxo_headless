@@ -19,9 +19,9 @@ abstract class Serializer
         return self::$serializers[$class] ?? null;
     }
 
-    public static function serializeToArray($object): array
+    public static function serializeToArray($object)
     {
-        if (is_array($object) && array_keys($object) === range(0, count($object) - 1)) {
+        if (is_array($object)) {
             $result = [];
             foreach ($object as $item) {
                 $result[] = self::serializeToArray($item);

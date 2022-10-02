@@ -1,0 +1,9 @@
+package: headless/navbuilder
+version: '0.0.1-dev'
+author: Daniel Planötscher
+
+load: early
+
+requires:
+    packages:
+        navbuilder: '^1.0.6'
