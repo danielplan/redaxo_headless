@@ -23,8 +23,8 @@ abstract class Serializer
     {
         if (is_array($object)) {
             $result = [];
-            foreach ($object as $item) {
-                $result[] = self::serializeToArray($item);
+            foreach ($object as $key => $item) {
+                $result[$key] = self::serializeToArray($item);
             }
             return $result;
         }
