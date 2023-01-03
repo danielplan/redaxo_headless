@@ -1,0 +1,5 @@
+{
+    "require": {
+        "thecodingmachine/graphqlite": "^6.1"
+    }
+}
